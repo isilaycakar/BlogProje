@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using System.Net;
+
 namespace CoreDemo
 {
     public class Program
@@ -8,6 +13,35 @@ namespace CoreDemo
 
             // Add services to the container.
             builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
+            builder.Services.AddSession();
+
+            //Yetkilendirme
+            builder.Services.AddMvc(config =>
+            {
+                var policy = new AuthorizationPolicyBuilder()
+                            .RequireAuthenticatedUser()
+                            .Build();
+                config.Filters.Add(new AuthorizeFilter(policy));
+            });
+
+            builder.Services.AddMvc();
+            builder.Services.AddAuthentication(
+                    CookieAuthenticationDefaults.AuthenticationScheme)
+                    .AddCookie(x =>
+                    {
+                        x.LoginPath = "/Login/Index";
+                    }
+                    );
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+                options.LoginPath = "/Login/Index";
+                options.SlidingExpiration = true;
+            });
 
             var app = builder.Build();
 
@@ -24,6 +58,10 @@ namespace CoreDemo
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseSession();
+
+            app.UseAuthentication();
+            
             app.UseRouting();
 
             app.UseAuthorization();

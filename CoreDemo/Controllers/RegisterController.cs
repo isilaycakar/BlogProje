@@ -27,7 +27,7 @@ namespace CoreDemo.Controllers
                 if (p.WriterPassword == p.ConfirmPassword)
                 {
                     p.WriterStatus = true;
-                    wm.AddWriter(p);
+                    wm.TAdd(p);
                     return RedirectToAction("Index", "Blog");
                 }
             }
